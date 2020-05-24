@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+
+<head>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<script>
+
+Array.prototype.myJoin = function(seperator,start,end){
+    if(!start) start = 0;
+    if(!end) end = this.length - 1;
+    end++;
+    return this.slice(start,end).join(seperator);
+};
+
+var szoveg = "";
+var rows;
+var resultRows = [];
+var finalRows = [];
+var counter = 0;
+var good = 0;
+var bad = 0;
+var actualRow = [];
+
+var titlee;
+var indexx = 0;
+var lessons = {};
+$(document).ready(function(){
+	$("#load").click(function() {
+
+		$( ".mondatok" ).each(function( index ) {
+			rows = [];
+			
+			rows = $(this).text().split("\n");
+			titlee = $(this).prev().text();
+			
+			//console.log (titlee);
+			lessons[titlee]=[];
+			
+			
+			resultRows = [];
+			
+			eachInArray (rows, removeEmptyRows);
+			eachInArray (resultRows, splitRows);
+		
+		
+		});
+		
+		
+		
+		for( index in lessons){
+			$("#vacak").append($("<option></option>")
+                    .attr("value",index)
+                    .text(index)); 
+		}
+		
+		
+		
+	}); 
+	
+	$("#start").click(function() {
+		reset();
+		var selectVals = $("#vacak").val();
+		console.log (selectVals);
+	
+		for( index2 in selectVals){
+			if (selectVals[index2]=="all")
+			{
+				reset();
+				for( index in lessons){
+					finalRows.push (...lessons[index]);
+				}
+				break;
+			}
+			for( index in lessons){
+				if (index == selectVals[index2]){
+					finalRows.push (...lessons[index]);
+				}
+			}
+		}
+	
+		console.log (finalRows);
+		
+		nextInRow();
+	});
+});
+
+
+
+function reset ()
+{
+indexx=0;
+finalRows = [];
+counter = 0;
+good = 0;
+bad = 0;
+}
+
+function known (){
+	good++;
+	nextRandom();
+}
+
+function knownNext () {
+	good++;
+	nextInRow();
+}
+
+function notKnown (){
+	bad++;
+	nextInRow();
+}
+
+function nextRandom (){
+	hide();
+	counter++;
+
+	actualRow = finalRows[Math.floor((Math.random() * finalRows.length))];
+	next ();
+}
+
+function nextInRow (){
+	hide();
+	counter++;
+	
+	actualRow = finalRows[indexx];
+
+	indexx++;
+	next ();
+}
+
+function next () {
+	$("#comment").val("");
+	$("#counter").html (counter);
+	$("#good").html (good);
+	$("#bad").html (bad);
+	$("#allInArray").html (finalRows.length);
+	$("#allInArray").html (finalRows.length);
+
+	try{
+		$("#first").text ((actualRow.myJoin("",0,1)));  //c-d));
+	}catch (ex)
+	{
+	}
+	
+	try{
+		$("#second").text ((actualRow.myJoin("",2,3)));
+	}catch (ex)
+	{
+	}
+	
+	try{
+		$("#addition").text ((actualRow.myJoin("",4,actualRow.length)));
+	}catch (ex)
+	{
+	}
+
+}
+
+function show (){
+	$("#first").css ({"visibility": "visible"});
+	
+	var text = $("#comment").val().toLowerCase().replace(/ /g,'');
+	var origText = (actualRow.myJoin("",0,1)).toLowerCase().replace(/ /g,'');
+	if (text == origText) {
+		$("#comment").css ({"background-color": "GreenYellow"});
+	} else {
+		$("#comment").css ({"background-color": "LightCoral"});
+	}
+	//$(".okNotOkButtons").css ({"display": "block"});
+	//$(".showButton").css ({"display": "none"});
+}
+
+function hide (){
+	$("#first").css ({"visibility": "hidden"});
+	$("#comment").css ({"background-color": "white"});
+	//$(".okNotOkButtons").css ({"display": "none"});
+	//$(".showButton").css ({"display": "block"});
+}
+
+
+function eachInArray (arrayKa, func){
+	for (i = 0; i < arrayKa.length; i++) { 
+		func (arrayKa[i]);
+	}
+}
+
+function removeEmptyRows (param){
+	if (param!="")
+	{
+		resultRows.push (param);
+	}
+}
+
+function splitRows (row){
+	var rowItems = row.split (/([.?!])/g);
+	lessons[titlee].push (rowItems);
+}
+
+
+
+</script>
+
+<body style="height: 100%;">
+
+
+<div class="container" style="min-height: 100%;
+    height: 100%;">
+  <span id="counter"></span> :: <span id="good"></span> :: <span id="bad"></span>:: <span id="allInArray"></span>
+
+
+<p style="padding:10px; font-size:18px;" id="second"></p>
+
+<p style="padding:10px; font-size:18px;" onclick="show()" id="first"></p>
+
+<p style="padding:10px; font-size:18px;" id="addition"></p>
+
+<div class="form-group">
+  <textarea class="form-control" rows="5" id="comment"></textarea>
+</div>
+
+
+<select id='vacak' multiple style="width:100%; height:200px;">
+<option value="all">Mind</option>
+</select>
+<button id="load">Load</button><button id="start">Start</button>
+
+<div class="btn-group btn-group-justified" style="position: absolute;
+    bottom: 0;
+    right: 0;">
+		<a href="#" class="btn btn-primary okNotOkButtons" onclick="knownNext()">Next</a>
+		<a href="#" class="btn btn-primary okNotOkButtons" onclick="known()">Random</a>
+		
+		<a href="#" class="btn btn-primary okNotOkButtons" onclick="notKnown()">Bad</a>
+		<a href="#" class="btn btn-primary showButton" onclick="show()">Show</a>
+
+
+</div>
+
+<pre style="display:none;">
+
+<h1>MŰVELTETŐ SZERKEZET</h1>
+<p class="mondatok"  >
+
+I will have him help us.	Rá fogom venni, hogy segítsen nekünk.
+
+You should have an expert deal with the case. Meg kellene bíznod egy szakembert, hogy foglalkozzon az üggyel.
+
+I had a lot of people come to my party.	Nagyon sok embert rávettem, hogy eljöjjön a bulimra.
+
+Will you have him drive?	Meg fogod kérni, hogy vezessen?
+
+I had a plumber finish the work.	Egy vízvezeték-szerelővel fejeztettem be a munkát.
+
+I had/got the lock replaced by my neighbour. Kicseréltettem a zárat a szomszédommal.
+
+Most mosatom az autómat. I am having/getting my car washed.
+
+I have had/got the phone repaired. Már megjavíttattam a telefont.
+
+I will have this book copied. Le fogom másoltatni ezt a könyvet. 
+
+She didn’t get her hair cut. Nem vágatta le a haját.
+
+He had all his books sold by his friend. Az összes könyvét eladatta a barátjával.
+
+We’ve been getting our flat painted for three weeks. Három hete festetjük a lakást.
+
+I’d like to have some paintings put on the wall. Szeretnék rakatni néhány képet a falra.
+
+Sometimes he has his articles written by beginner journalists. Néha kezdő újságírókkal íratja meg a cikkeit.
+
+Did you have this photo taken in Spain? Spanyolországban csináltattad ezt a képet?
+
+Have you ever got shoes made for yourself? Csináltattál magadnak valaha cipőt?
+
+Have two pizzas brought! Hozass két pizzát!
+
+She is getting a new house built. Építtet egy új házat.
+
+I made my brother write my homework.	A testvéremmel írattam meg a házi feladatomat. (vagy: Rávettem a testvéremet, hogy írja meg…)
+
+This film always makes her cry.	Ez a film mindig megsiratja.
+
+You will never make him dance!	Soha nem fogod rávenni, hogy táncoljon!
+
+His jokes never made me laugh.	A viccei soha nem nevettettek meg.
+
+Have you made John help you?	Te rávetted Johnt, hogy segítsen?
+
+The boss made the secretary type the letter.	A főnök a titkárnővel gépeltette le a levelet.
+
+He made everybody believe that he was Italian. Mindenkivel elhitette, hogy olasz.
+
+I made the neighbour replace the lock. Kicseréltettem a szomszéddal a zárat.
+
+These children will make you go mad.	Ezek a gyerekek meg fognak téged őríteni.
+
+Sunshine makes me feel better.	A napsütéstől jobban érzem magam.
+
+I was made to clean up the flat.	Velem takaríttatták ki a lakást.
+
+You'll be made to help too.	Neked is kell majd segítened. (Téged is rá fognak venni, hogy segíts.)
+
+Mary has been made to live in one room with Jordan. Rákényszerítették Maryt, hogy egy szobában lakjon Jordannel.
+
+We got him to bring us something to drink. Hozattunk vele innivalót. (vagy: Rávettük, hogy hozzon…)
+
+Jane got Tarzan to eat the banana soup.	Jane megetette Tarzannal a banánlevest.
+
+Can she get somebody to change the oil?	Ki tudja cseréltetni valakivel az olajat?
+
+I will get him to sing.	Majd én ráveszem, hogy énekeljen.
+
+Nobody has ever been able to get him to show them his poems. Soha senki nem tudta még rávenni, hogy mutassa meg a verseit.
+
+Who got Jones to repair the fridge?	Ki vette rá Jonest, hogy megjavítsa a hűtőt?
+
+</p>
+<h1>SHALL SHOULD</h1>
+<p class="mondatok"  >
+
+Shall I help you? Segítsek?
+
+Shall I open the door for you? Kinyissam neked az ajtót?
+
+Shall we talk about our project? Beszéljünk a projektünkről?
+
+We shall overcome! Győzni fogunk!
+
+Let’s go, shall we? Menjünk, jó?
+
+Let’s not stay here any longer, shall we? Ne maradjunk itt tovább, jó?
+
+You should learn more! Többet kellene tanulnod!
+
+Jane shouldn’t have gone to the concert with such high temperature. Jane-nek nem kellett volna elmennie a koncertre ilyen magas lázzal.
+
+I should start preparing for my English language exam. El kellene kezdenem készülni az angol nyelvvizsgára.
+
+If Tim should show up, tell him that the boss wants to talk to him! Ha esetleg felbukkanna Tim, mondd meg neki, hogy a főnök beszélni akar vele.
+
+You ought to wear a helmet in the production area. Sisakot kellene viselned a termelési területen.
+
+You ought to have submitted the article before the deadline, not after it. A határidő előtt kellett volna leadnod a cikket, nem utána.
+
+</p>
+<h1>NEED</h1>
+<p class="mondatok"  >
+
+I need a hammer. Szükségem van egy kalapácsra.
+
+I don’t need any onion for the dinner. A vacsorához nincs szükségem hagymára.
+
+He needs to go to the registry office. El kell mennie az okmányirodába. (=He has to go to the registry office.)
+
+We needed less time to solve the task than they. Nekünk kevesebb időre volt szükségünk megoldani a feladatot, mint nekik.
+
+You needed to call a taxi because of your broken ankle, didn’t you? A törött bokád miatt kellett taxit hívnod, ugye?
+
+The office needs cleaning. Ráfér az irodára egy takarítás. (Elkelne egy takarítás…)
+
+You needn’t come, if you don’t want to. Nem szükséges eljönnöd, ha nem akarsz. (=You don’t need to come…/You don’t have to come…)
+
+I needn’t have gone to the meeting. Nem kellett volna elmennem a megbeszélésre. (Feleslegesen mentem)
+
+</p>
+<h1>MUST</h1>
+<p class="mondatok"  >
+
+I must eat something. Ennem kell valamit.
+
+We must find the best solution for ourselves. Meg kell találnunk a legjobb megoldást magunknak.
+
+You must have your knee checked by a doctor. Meg kell (kellene) nézetned a térded egy orvossal.
+
+You must have a cup of tea. Innod kell egy csésze teát. (Meg kell kóstolnod.)
+
+You must know something about the plans. Te biztos tudsz valamit a tervekről.
+
+Mary must be working now. Mary most biztos dolgozik.
+
+Jill must have received our parcel by now. Jill mostanra biztos megkapta a csomagunkat.
+
+We mustn’t shut down the system. Tilos lekapcsolnunk a rendszert.
+
+You mustn’t shout in a library. Nem kiabálhatsz egy könyvtárban.
+
+</p>
+<h1>HAVE TO</h1>
+<p class="mondatok"  >
+
+A have to nem segédige, hanem főige, tehát ugyanúgy kell használnunk, mint a többi igét.
+
+I have to get up early. Korán fel kell kelnem.
+
+I don’t have to participate in the play. Nem kell részt vennem a színdarabban.
+
+Did you have to queue in front of the shop to buy that new phone? Sorban kellett állnod, hogy megvedd azt az új telefont?
+
+You will have to work on this report a bit more tomorrow. Holnap még egy kicsit dolgoznod kell ezen a jelentésen.
+
+I’ve got to go now! Most már mennem kell!
+
+She’s got to prepare all the food alone for the dinner. Egyedül kell elkészítenie az összes ételt vacsorára.
+
+I will call you back in a minute! Mindjárt visszahívlak!
+
+</p>
+<h1>Will</h1>
+<p class="mondatok"  >
+
+I bet she will choose the pink T-shirt. Fogadok, hogy a rózsaszínű pólót fogja választani.
+
+Will you open the door for me? Kinyitod (Kinyitnád) nekem az ajtót?
+
+Will you slice it up for me, please? Felszeletelné nekem, kérem?
+
+The car won’t start. – Nem indul az autó. /  Az autó nem akar elindulni.
+
+This door won’t open! Nem akar kinyílni ez az ajtó!
+
+</p>
+<h1>Would</h1>
+<p class="mondatok"  >
+
+I wouldn’t use that old axe if I were you! Nem használnám azt a régi baltát, ha a helyedben lennék!
+
+We would be in a big trouble now if Bill hadn’t brought a map. Most nagy bajban lennénk, ha Bill nem hozott volna egy térképet. (Kevert típusú feltételes mondat – lásd: Feltételes mondatok)
+
+Marry would always tell us amazing stories about her trips around the world when she came over. Mary mindig elképesztő történeteket mesélt a föld körüli útjairól, amikor átjött hozzánk.
+
+We’d (=We would) play football all day long when we were kids. Gyerekkorunkban egész nap fociztunk.
+
+</p>
+<h1>May</h1>
+<p class="mondatok"  >
+
+May I use your phone to call my Mom? Használhatom a telefonodat, hogy felhívjam anyukámat?
+
+Might I use your phone to call my Mom? (Esetleg) használhatnám a telefonodat, hogy felhívjam anyukámat?
+
+May I come in? Bejöhetek?
+
+You may put on my coat if you are cold. Felveheted a kabátomat, ha fázol.
+
+Might we crash here tonight? Esetleg alhatnánk itt ma éjjel? (Igen, a crash ezt is jelenti!)
+
+You might borrow my car if promise to bring it back till 10 o’clock. Kölcsönkérheted az autómat, ha megígéred, hogy visszahozod 10-ig.
+
+John may come to the party. Lehet, hogy eljön John a buliba.
+
+John might come to the party. Elképzelhető, hogy eljön John a buliba.
+
+This play might actually work! Ez a terv akár működhet is!
+
+Mary may call Jim in the afternoon. Mary lehet, hogy felhívja Jimet délután.
+
+He may have missed the bus. Lehet, hogy lekéste a buszt. (De nem vagyunk benne biztosak.)
+
+She might have left before the concert. Elképzelhető, hogy (már) a koncert előtt elment.
+
+</p>
+<h1>Abel to</h1>
+<p class="mondatok"  >
+
+Frank could drive when he was 20. Frank 20 évesen tudott vezetni.
+
+Frank was able to drive home despite the heavy snowfall. A nagy hóesés ellenére Frank haza tudott vezetni.
+
+I haven’t been able to speak to Mr Jackson for days. Napok óta nem tudok Jackson úrral beszélni. (itt csak a be able to szerkezet használható, hiszen az igeidő Befejezett jelen, a can/could pedig csak Egyszerű jelenben/múltban használható)
+
+You won’t be able to lift that alone! Nem fogod tudni egyedül megemelni! (szintén csak ez a megoldás jó, mivel jövő időről van szó)
+
+If we had been able to reboot the system, the situation could have been solved. Ha újra tudtuk volna indítani a rendszert, meg lehetett volna oldani a helyzetet.
+
+</p>
+<h1>Can</h1>
+<p class="mondatok"  >
+
+I can see a house over there. Látok ott egy házat.
+
+Can you hear the music? Hallod a zenét?
+
+I can smell something burning! Érzek valami égett szagot!
+
+We could taste something very spicy. Valami nagyon fűszeres ízt éreztünk.
+
+I could feel the cold breeze of autumn as I opened the door. Ahogy kinyitottam az ajtót, éreztem a hűvös őszi szellőt.
+
+Can you remember the face of the man? Emlékszel a férfi arcára?
+
+I just cannot remember what she told me about using the oven. Egyszerűen nem emlékszem mit mondott a sütő használatáról.
+
+I couldn’t really understand what they were talking about. Nem igazán értettem, hogy miről beszélnek.
+
+The music was quite loud, however, I could understand every word. A zene elég hangos volt, ennek ellenére minden szót értettem.
+
+I can swim, I learnt it when I was 10. Tudok úszni, 10 éves koromban tanultam meg.
+
+Mary can use the computer very well. Mary nagyon jól tudja használni a számítógépet.
+
+They can start the new machine at the beginning of next week. Jövő hét elején el tudják indítani az új gépet.
+
+Jim can play the guitar. Jim tud gitározni.
+
+You can use my pen. Használhatod a tollamat.
+
+Can I sleep here? Alhatok itt?
+
+Could I sleep here? Alhatnék itt?
+
+You can print the documents from my computer if you wish! Kinyomtathatod a dokumentumokat a gépemről, ha szeretnéd!
+
+Jason can drive his father’s car. Jason vezetheti az apja autóját.
+
+You can’t just come in here whenever you want. Nem jöhetsz be ide, amikor csak akarsz!
+
+Can I borrow this book? Kölcsönkérhetem ezt a könyvet? (engedély kérése, hasonlít a may-re!)
+
+She can have dinner with us. Vacsorázhat velünk. (engedély adása)
+
+We can make an excursion at the weekend as the weather is going to be nice. Kirándulhatunk a hétvégén, mivel az idő szép lesz. (lehetőség kifejezése)
+
+Bob could find the solution to the exercise in 5 minutes. Bob 5 perc alatt megtalálta (meg tudta találni) a megoldást a feladatra.
+
+Jenny could collect the rabbits in the garden alone. Jenny egyedül össze tudta gyűjteni a nyulakat a kertben.
+
+A could segédigének, azonban, van egy másik, a feltételes mondatok témakörébe tartozó használata is: “tudna csinálni valamit”, “csinálhatna valamit”
+
+Mary could help us if she were here. Mary tudna nekünk segíteni, ha itt lenne.
+
+Couldn’t you be a bit more polite with her? Nem tudnál egy kicsit udvariasabb lenni vele?
+
+John can’t be at home, I saw him walking in the park a few minutes ago. John nem lehet otthon (Az nem lehet, hogy John otthon van), mert pár perce láttam a parkban sétálni.
+
+They can’t have many friends, they are so rude to everyone. Nem lehet sok barátjuk, olyan rosszindulatúak mindenkivel.
+
+She can’t be working with the new computer. It hasn’t been installed yet. Az nem lehet, hogy az új számítógépen dolgozik. Még nem lett telepítve.
+
+Bob can’t have arrived in time, he had left home so late! Biztos nem ért oda időben, olyan későn idult el otthonról!
+
+</p>
+<h1>Will</h1>
+<p class="mondatok"  >
+
+Tom will be here soon.	Tom hamarosan itt lesz.
+
+I will be a doctor.	Orvos leszek.
+
+The letter will be on the table.	A levél az asztalon lesz.
+
+Will they be there?	Ott lesznek?
+
+Where will the dinner be?	Hol lesz a vacsora?
+
+Who will be the first?	Ki lesz az első?
+
+I won't be on time.	Nem leszek pontos.
+
+She won't be in the building.	Nem lesz az épületben.
+
+Will you visit us some time?	Meg fogsz látogatni minket valamikor?
+
+When will the plane take off?	Mikor fog a gép felszállni?
+
+How will they get a ticket?	Hogyan fognak jegyet szerezni?
+
+I will call you at 7.30.	7.30-kor hívni foglak.
+
+She will come next week.	Jövő héten el fog jönni.
+
+Mary and Steve will divorce.	Mary és Steve el fognak válni.
+
+I will buy bread.	Veszek majd kenyeret.
+
+I will be 32 next month.	Jövő hónapban leszek 32 éves.
+
+John won't like the idea.	Johnnak nem fog tetszeni az ötlet.
+
+Bruce won't get up till 11.	Bruce nem fog felkelni 11-ig.
+
+I won't read this book.	Nem fogom elolvasni ezt a könyvet.
+
+Will you water the flowers?	Meg fogod locsolni a virágokat?
+
+Where will they live?	Hol fognak lakni?
+
+Who will you meet tomorrow?	Kivel fogsz találkozni holnap?
+
+When you come home, we'll be sleeping.	Amikor hazajössz, mi (éppen) aludni fogunk.
+
+When her plane lands in London, we will	only be travelling towards London. Amikor leszáll a gépe Londonban, mi még csak utazni fogunk London felé.
+
+What will you be doing at noon tomorrow?	Mit fogsz csinálni holnap délben?
+
+Will you be waiting for her too when she finishes work? Te is várni fogsz rá, mikor befejezi a munkát?
+
+While you are working, I will be reading.	Amíg te dolgozol, én olvasni fogok.
+
+While she is cooking, we will be playing.	Amíg főz, játszani fogunk.
+
+While you are running, he'll be sleeping.	Amíg te futsz, ő aludni fog.
+
+Bob will be waiting outside while you are talking. Bob kint fog várni, amíg ti beszélgettek.
+
+Where will you be sleeping while they are painting your room? Hol fogsz aludni, amíg festik a szobádat?
+
+While you are cleaning, I'll turn off the heating. Amíg takarítasz, lekapcsolom majd a fűtést. (A lekapcsolás egy pillanatnyi cselekvés, nem végezzük folyamatosan. Így ez a mondat már nem tartalmaz folyamatos jövőt!)
+
+I'll be meeting John tomorrow.	Holnap találkozom John-nal. (Mert például együtt dolgozunk.)
+
+I'll be taking my exam next week.	Jövő héten vizsgázom. (=I'm taking my exam…)
+
+Will you be having dinner at home this evening? Otthon fogsz ma vacsorázni?
+
+Will you be using the computer?	Használni fogod a számítógépet?
+
+They will be singing all night.	Egész éjjel énekelni fognak.
+
+The machine will be working all week.	A gép egész héten menni fog.
+
+Will you be staying there all Christmas?	Egész Karácsonykor ott leszel?
+
+Jack will be sleeping all day.	Jack egész nap aludni fog.
+
+We won't be eating all day.	Egész nap nem fogunk enni.
+
+I won't be staying for long.	Nem fogok sokáig maradni.
+
+They won't be waiting for you.	Nem fognak várni rád.
+
+He won't be learning then.	Nem fog akkor tanulni.
+ 
+What will you be doing at this time tomorrow? Mit fogsz csinálni holnap ilyenkor?
+
+Will she be eating while we are here?	Enni fog, amíg mi itt leszünk?
+
+How will he be driving in such weather?	Hogy fog ilyen időben vezetni?
+
+Bob will have written the essay by six.	Bob hatra meg fogja írni a dolgozatot.
+
+They won't have started by 10:30.	Nem fognak 10:30-ra elindulni.
+
+By the time you get up, I will have made coffee. Mire felkelsz, csinálok (majd) kávét.
+
+He will have repaired the door before you come home.	Meg fogja javítani az ajtót, mielőtt hazajössz.
+
+By the end of this year I will have lived here for 10 years. Ez év végén lesz 10 éve, hogy itt lakom. (10 éve fogok itt lakni ez év végén.)
+
+Will he have got the letter before he leaves for Italy?	Meg fogja kapni a levelet, mielőtt elindul Olaszországba?
+
+Michael won't have seen Sue for a year by next month. Jövő hónapban lesz egy éve, hogy nem látta Michael Sue-t.
+
+I will have taken the exam by this time next week. Jövő hét ilyenkorra meglesz a vizsgám.
+
+Will you have been ready by then?	Készen leszel addigra?
+
+We won't have arrived by the start of the play. Nem fogunk odaérni a darab kezdetére.
+
+By the time Joe's plane lands, I will have parked his car in front of the airport. Mire leszáll Joe gépe, leparkolom az autóját a repülőtér elé.
+
+We won't have arrived by 10.	Nem fogunk odaérni 10-re.
+
+They won't have woken up by 9.	Nem fognak 9-re felébredni.
+
+Will you have finished it by that time?	Be fogod fejezni addigra?
+
+How will they have written all the letters by the evening? Hogyan fogják megírni az összes levelet estig?
+
+By the time you return from the USA, we will have been building our new house. Mire visszajössz az USA-ból, mi már építeni fogjuk az új házunkat.
+
+When he gets up, Mary will have been working. Mikor felkel, Mary már dolgozni fog.
+
+By 9 he will have been showing the guests around. 9-kor már a vendégeket fogja körbekísérni.
+
+By this time tomorrow we will have been travelling. Holnap ilyenkor már utazni fogunk.
+
+Will you have been waiting for us?	Te már várni fogsz minket?
+
+I won't have been working for a week by then. Addigra már egy hete nem fogok dolgozni.
+
+When we return, they will have been sleeping. Mire visszajövünk, már aludni fognak.
+
+By the time Bob gets the letter, I will have been working in Alaska. Mire Bob megkapja a levelet, én már Alaszkában fogok dolgozni.
+
+Will she have been negotiating at 10?	Tízkor már tárgyalni fog?
+
+We won't have been trvelling at 10.	Tízkor már nem fogunk utazni.
+
+Will you have been doing it by then?	Akkor már azt fogod csinálni?
+
+How will they have been writing it by the evening? Hogyan fogják este már azt írni?
+
+</p>
+<h1>Passzív</h1>
+<p class="mondatok"  >
+
+The book will be sold from next month.	A könyv jövő hónaptól lesz árusítva. (A könyvet jövő hónaptól fogják árusítani.)
+
+Her arm was plastered.	A karja be lett gipszelve. (Begipszelték a karját.)
+
+He is being examined at the hospital now.	Most van kivizsgálva a kórházban. (Most vizsgálják ki a kórházban.)
+
+The parcels are always delivered in the morning. A csomagok mindig délelőtt vannak kiszállítva. (A csomagokat mindig délelőtt szállítják ki.)
+
+The burglar has been arrested.	A betörő le lett tartóztatva. (Letartóztatták a betörőt.)
+
+Has she been promoted?	Előléptették?
+
+In the hurricane dozens of houses were destroyed.	A hurrikánban házak tucatjai semmisültek meg.
+
+The newspaper is brought every morning.	Az újságot hozzák minden reggel.
+
+His son has been kidnapped.	Elrabolták a fiát.
+
+The suspects were being questioned when I arrived. A gyanúsítottakat éppen akkor hallgatták ki, mikor megérkeztem.
+
+All the fruit trees here were planted in 2000. Az összes itteni gyümölcsfát 2000-ben ültették.
+
+After the girl had been found, everybody went home relieved. Miután megtalálták a lányt, mindenki megkönnyebbülten ment haza.
+
+This film was shot in Sierra Leone.	Ezt a filmet Sierra Leone-ban forgatták.
+
+Is your car being repaired now?	Most javítják az autódat?
+
+His paintings will be exhibited in a gallery in Barcelona. Egy barcelonai galériában fogják kiállítani a képeit.
+
+Was the new machine tested?	Tesztelték az új gépet?
+
+Today the lunch was cooked by Joe.	Ma az ebédet Joe főzte. 
+
+All the books here were written by Poe.	Az összes könyvet itt Poe írta.
+
+Bill has been hit by a doctor.	Billt egy orvos ütötte el.
+
+The lost wallet was found by a child.	Az elvesztett pénztárcát egy gyerek találta meg.
+
+This picture was painted by my father.	Az apám festette ezt a képet.
+
+The bus 21 is driven by a young woman.	A 21-es buszt egy fiatal nő vezeti.
+
+The main character was acted by my favourite actor. A főszerepet a kedvenc színészem alakította.
+
+Everybody was invited by Sue.	Mindenkit Sue hívott meg.
+
+I was shocked by his behaviour.	Ledöbbentett a viselkedése.
+
+The car was driven by a politician.	Az autót egy politikus vezette.
+
+</p>
+<h1>Feltételes</h1>
+<p class="mondatok"  >
+
+If we get up early, we will go to the zoo.	Ha felkelünk korán, el fogunk menni az állatkertbe.
+
+If she runs, she will catch the bus.	Ha fut, el fogja érni a buszt.
+
+If you drive, I will sleep.	Ha te vezetsz, én aludni fogok.
+
+If you come to the party, you will meet my new boss. Ha eljössz a partira, találkozni fogsz az új főnökömmel.
+
+If I have time, I'll go swimming.	Ha lesz időm, el fogok menni úszni.
+
+If you don't learn, you won't pass the exam. Ha nem tanulsz, nem fogsz átmenni a vizsgán.
+
+Bob will come if we invite him.	Bob el fog jönni, ha meghívjuk.
+
+Will you have another job if the factory closes down? Lesz másik munkád, ha a gyár bezár?
+
+If the weather is nice, we will go for a walk.	Ha szép idő lesz, sétálni fogunk egyet.
+
+If you break it, I'll be very angry.	Ha összetöröd, nagyon mérges leszek.
+
+If you are ready, you may go home.	Ha készen vagy, hazamehetsz.
+
+If it stops snowing, we can go out.	Ha eláll a hó, kimehetünk.
+
+If you want to lose weight you must/should eat less. Ha fogyni akarsz, kevesebbet kell/kellene enned.
+
+If we got up early, we would go to the zoo.	Ha felkelnénk korán, elmennénk az állatkertbe.
+
+If she ran, she would catch the bus.	Ha futna, elérné a buszt.
+
+If you drove, I would sleep.	Ha te vezetnél, én aludnék.
+
+If you came to the party, you would meet my new boss.	Ha eljönnél a partira, találkoznál az új főnökömmel.
+
+If I had time, I'd go swimming.	Ha lenne időm, elmennék úszni.
+
+If you didn't learn, you wouldn't pass the exam. Ha nem tanulnál, nem mennél át a vizsgán.
+
+Bob would come if we invited him.	Bob eljönne, ha meghívnánk.
+
+Would you have another job if the factory closed down?	Lenne másik munkád, ha a gyár bezárna?
+
+If the weather was nice, we'd go for a walk.	Ha szép idő lenne, sétálnánk egyet.
+
+If you broke it, I would be very angry.	Ha összetörnéd, nagyon mérges lennék.
+
+If you tried it, it might work.	Ha megpróbálnád, lehet, hogy működne.
+
+If he had a permission, he could get a job.	Ha lenne engedélye, találhatna munkát.
+
+If he was/were here, he would know the answer. Ha itt lenne, tudná a választ.
+
+Were he here, he would know the answer.	Ha itt lenne, tudná a választ.
+
+If we had got up early, we would have	gone to the zoo. Ha felkeltünk volna korán, elmentünk volna az állatkertbe.
+
+If she had run, she would have caught	the bus. Ha futott volna, elérte volna a buszt.
+
+If you had driven, I would have slept.	Ha vezettél volna, aludtam volna.
+
+If you'd come to the party, you would	have met my new boss. Ha eljöttél volna a partira, találkoztál volna az új főnökömmel.
+
+If I had had time, I'd have gone swimming.	Ha lett volna időm, elmentem volna úszni.
+
+If you hadn't learnt, you wouldn't have	passed the exam. Ha nem tanultál volna, nem mentél volna át a vizsgán.
+
+Bob would've come if we had invited him.	Bob eljött volna, ha meghívtuk volna.
+
+Would you have had another job if the	factory had closed down? Lett volna másik munkád, ha a gyár bezárt volna?
+
+If the weather had been nice, we would	have gone for a walk. Ha szép idő lett volna, sétáltunk volna egyet.
+
+If you had broken it, I'd have been very	angry. Ha összetörted volna, nagyon mérges lettem volna.
+
+If you had tried it, it might have worked.	Ha megpróbáltad volna, lehet, hogy működött volna.
+
+If he had had a permission, he could have	got a job. Ha lett volna engedélye, találhatott volna munkát.
+ 
+Had he come, we would have given him the book. Ha eljött volna, odaadtuk volna neki a könyvet.
+
+If she had learnt more at school, she would be an engineer now.	Ha többet tanult volna az iskolában, most mérnök lenne.
+
+If I had bought that TV, we could watch the match today. Ha megvettem volna azt a TV-t, meg tudnánk nézni ma a meccset.
+
+If we hadn't bought bread, we couldn't make sandwiches. Ha nem vettünk volna kenyeret, nem tudnánk szendvicset csinálni.
+
+If I didn't love you, I wouldn't have married you. Ha nem szeretnélek, nem vettelek volna el.
+
+If he didn't have time, he wouldn't have called us. Ha nem érne rá, nem hívott volna minket.
+
+If I were strong, I would have beaten him a long time ago. Ha erős lennék, már régen megvertem volna.
+
+I would be very greatful if you would	send me your brossure. Hálás lennék, ha elküldené a prospektusukat.
+
+If you would like to come, I'll buy you a ticket too. Ha szeretnél jönni, veszek majd neked is jegyet.
+
+If he should come today, please, call me at once! Ha esetleg ma jönne, hívj fel azonnal, légy szíves!
+
+</p>
+<h1>Jelen</h1>
+<p class="mondatok"  >
+
+I live in a small town. Egy kisvárosban lakom.
+
+Mary likes tennis. Mary szereti a teniszt.
+
+He always gets up at 6 o'clock. Mindig 6-kor kel.
+
+Usually I meet my friends at the weekends. Általában hétvégente találkozom a barátaimmal.
+
+We have a very old car. Egy nagyon régi autónk van.
+
+Tom is 33 years old. Tom 33 éves.
+
+I don't like handball. Nem szeretem a kézilabdát.
+
+Susan doesn't have cats. Susannek nincsenek macskái.
+
+He doesn't always read the newspaper. Nem mindig olvassa el az újságot.
+
+Do you have a camera? Van fényképezőgéped?
+
+Does the dog like milk? Szereti a kutya a tejet?
+
+I do not have a house. = I don't have a house. Nincs házam.
+
+This cat does not live here. Ez a macska nem itt lakik.
+
+Do you live near here? A közelben laksz?
+
+Does your brother study at university? A testvéred egyetemen tanul?
+
+He loves football. Imádja a focit.
+
+Does he love football? Imádja a focit?
+
+He doesn't love football. Nem imádja a focit.
+
+She sleeps a lot. Sokat alszik.
+
+Does she sleep a lot? Sokat alszik?
+
+She doesn't sleep a lot. Nem alszik sokat.
+
+It works well. Jól működik.
+
+Does it work well? Jól működik?
+
+It doesn't work well. Nem működik jól.
+
+John runs every day. John minden nap fut.
+
+Does John run every day? Fut John minden nap?
+
+John doesn't run every day. John nem fut minden nap.
+
+I am learning English now.	Most angolt tanulok.
+
+They are working.	Dolgoznak (most).
+
+She is sleeping.	Alszik.
+
+Are you watching this film?	Nézed ezt a filmet?
+
+Phil isn't playing now.	Phil most nem játszik.
+
+The bus is coming! Jön a busz!
+
+It is raining. Esik az eső.
+
+I haven't seen him yet.	Még nem láttam (őt).
+
+They haven't arrived.	Nem érkeztek meg.
+
+Have you ever tried windsurfing?	Próbáltad már a szörfözést?
+
+Has she found him?	Megtalálta?
+
+I have seen the new play.	Láttam már az új színdarabot.
+
+Mary has already met him twice.	Mary már kétszer találkozott vele.
+
+I have travelled by plane already.	Utaztam már repülővel.
+
+Have you read the newspaper yet?	Olvastad már az újságot?
+
+How many times have you been to Austria? Hányszor voltál már Ausztriában?
+
+Have you ever drunk tea with milk?	Ittál már (valaha) teát tejjel?
+
+I have never driven a van.	Még soha nem vezettem furgont.
+
+We haven't met yet.	Mi még nem találkoztunk.
+
+Haven't you done your homework?	Nem csináltad meg a házi feladatodat?
+
+Have you ever tried it?	Próbáltad már (valaha)?
+
+Has she ever eaten snail?	Evett (valaha) csigát?
+
+Have they ever arrived on time?	Érkeztek valaha is pontosan?
+
+I have never read such a boring book.	Soha nem olvastam még ilyen unalmas könyvet.
+
+The dog has never jumped over this fence.	A kutya még soha nem ugrotta át ezt a kerítést.
+
+We have never played badminton.	Még soha nem tollasoztunk.
+
+I have lived here for three years.	Három éve lakom itt.
+
+She has had her dog since last summer.	Múlt nyár óta van meg neki a kutyája.
+
+Bill has worked here since 1993.	Bill 1993 óta dolgozik itt.
+
+I have driven for two years.	Két éve vezetek.
+
+She hasn't drunk wine for six months.	Hat hónapja nem ivott bort.
+
+Since when have you learned English?	Mióta tanulsz angolul?
+
+How long has she played tennis?	Mióta/Mennyi ideje teniszezik?
+
+I have just cleaned up.	Éppen most takarítottam fel.
+
+She has just left for school.	Éppen most ment el az iskolába.
+
+I've just spoken to Mr Brown.	Éppen most beszéltem Mr Brownnal
+
+We have just arrived home.	Éppen most értünk haza.
+
+Mary has just finished cooking.	Mary éppen most fejezte be a főzést.
+
+He has just turned off the radio.	Éppen most kapcsolta ki a rádiót.
+
+Somebody has stolen my bicycle.	Valaki ellopta a biciklimet.
+
+John has passed the exam.	John letette a vizsgát. (Nem kell többet tanulnia.)
+
+At last we have arrived.	Végre megérkeztünk. 
+
+I have found a purse.	Találtam egy pénztárcát. (Van benne száz font!)
+
+I have opened the window.	Kinyitottam az ablakot. (Ha fázol, csukd be!)
+
+He has changed the lock.	Kicserélte a zárat. (Nem tudunk bemenni.)
+
+A dog has bitten me.	Megharapott egy kutya. (Be van kötve a kezem.)
+
+I haven't read your book.	Nem olvastam el a könyved.
+
+Michael has sent us a postcard.	Michael küldött nekünk egy képeslapot. (Nézd!)
+
+Have you found your bag?	Megtaláltad a táskádat? (Vagy még keresed?)
+
+Where have you been?	Hol voltál? (Ilyen sokáig?)
+
+I have seen her in a pub.	Láttam egy kocsmában. (Nem is beteg.)
+
+We have been waiting for you for an hour.	Már egy órája várunk rád.
+
+They have been sleeping for a day.	Már egy napja alszanak.
+
+How long have they been working? Mennyi ideje dolgoznak?
+
+She's been writing the test. Már írja a tesztet.
+
+They have been having lunch. Már ebédelnek.
+
+I have been working on this for two weeks. Két hete ezen dolgozom.
+
+He's been driving for five hours. Öt órája vezet.
+
+I have been wanting this boor for years. Évek óta (meg) akarom (szerezni) ezt a könyvet.
+
+The people on strike haven't been eating for two days.	A sztrájkolók már két napja nem esznek.
+
+It has been snowing for a long time. Már régóta havazik.
+
+I haven't been working for long. Régóta nem dolgozom.
+
+They haven't been learning too well.	Nem tanulnak túl jól.
+
+Have you been waiting long?	Régóta vársz már?
+
+Has she been crying?	Sír?
+
+</p>
+<h1>Múlt egyszerű</h1>
+<p class="mondatok"  >
+
+She lived in London for 2 years.	Élt Londonban két évig.
+
+I often played football on Sundays.	Gyakran fociztam vasárnaponként.
+
+Bob worked here 3 years ago.	Bob 3 évvel ezelőtt dolgozott itt.
+
+We had a lot of books.	Sok könyvünk volt.
+
+They went on an excursion every weekend. Minden hétvégén kirándulni mentek.
+
+I didn't have any time yesterday.	Nem volt időm tegnap.
+
+Jack didn't go to the cinema.	Jack nem ment el moziba.
+
+My parents didn't come to the zoo.	A szüleim nem jöttek el az állatkertbe.
+
+Did she enjoy the game?	Élvezte a játékot?
+
+Did you do the homework?	Megcsináltad a házi feladatot?
+
+Why didn't you call me?	Miért nem hívtál fel?
+
+</p>
+<h1>Múlt folyamatos</h1>
+<p class="mondatok"  >
+
+When I woke up, she was cooking.	Amikor felkeltem, ő éppen főzött.
+
+At 9 o'clock we were watching the film.	9-kor néztük a filmet.
+
+They were learning when I arrived.	Tanultak, mikor megérkeztem.
+
+What were you doing then?	Te akkor mit csináltál?
+
+John wasn't doing anything.	John semmit sem csinált.
+
+While I was doing crosswords, she was	sleeping. Amíg én rejtvényt fejtettem, ő aludt.
+
+While they were playing football, we	sleeping. Amíg ők fociztak, mi beszélgettünk.
+
+Bob was waiting in the park while his	girlfriend was writing the test. Bob a parkban várt, míg a barátnője a tesztet írta.
+
+Were you going to the party when we met yesterday? A buliba mentél, mikor tegnap találkoztunk?
+
+While I was gardening, he broke a vase.	Amíg én kertészkedtem, ő eltört egy vázát.
+
+The guests arrived while we were walking. Míg mi sétáltunk, megjöttek a vendégek.
+
+I was reading in the afternoon.	Délután olvastam.
+
+We were working on the plan.	Dolgoztunk a terven. (De nem fejeztük be.)
+
+She was writing the essay.	Írta a dolgozatot. (De nem írta meg.)
+
+She was crying all night.	Egész éjszaka sírt.
+
+I was working all summer.	Egész nyáron dolgoztam.
+
+The dog was running all day.	A kutya egész nap szaladgált.
+
+Were you drinking all night?	Egész éjjel ittál?
+
+I wasn't sleeping all weekend.	Egész hétvégén nem aludtam.
+
+Was she waiting for the bus?	A buszra várt?
+
+Where were you going when I saw you?	Hová mentél, amikor láttalak?
+
+</p>
+<h1>Múlt befejezett</h1>
+<p class="mondatok"  >
+
+I hadn't seen him before that.	Nem láttam őt azelőtt.
+
+As she hadn't finished school, she	couldn't find a good job now.	Mivel nem fejezte be az iskolát, most nem talált jó állást.
+
+Had you started learning English before the course? A tanfolyam előtt elkezdtél már angolt tanulni?
+
+By 9 o'clock we all had finished the work.	9-re mind befejeztük a munkát.
+
+By noon I had had lunch.	Délre megebédeltem.
+
+When John had got dressed, we called a taxi. Mikor John felöltözött, hívtunk egy taxit.
+
+Before I left for school, I had eaten a sandwich. Mielőtt elindultam iskolába, ettem egy szendvicset.
+
+By the time we arrived, Peter had fallen asleep. Mire megérkeztünk, Peter elaludt.
+
+After he had parked the car, he went in the building. Miután leparkolta az autót, bement az épületbe.
+
+As soon as he had arrived home, he called his friend. Amint hazaért, felhívta a barátját.
+
+No sooner had she got into the car than it started to rain. Alighogy beszállt az autóba, elkezdett esni.
+
+Hardly had I got to the station when the train left. Éppenhogy odaértem az állomásra, elindult a vonat.
+
+I had eaten a sandwich before I left for school.	Ettem egy szendvicset, mielőtt elindultam iskolába.
+
+Before we had finished our lunch he ordered us back to work. Mielőtt befejeztük volna az ebédet, visszarendelt minket dolgozni.
+
+When my first son was born, I had been a soldier for five years.	Amikor az első gyerekem megszületett, már öt éve katona voltam.
+
+The factory closed down in 1990, I had	worked there for twenty years. A gyár 1990-ben zárt be, húsz évig dolgoztam ott.
+
+I had started doing karate before I went to university. Azelőtt kezdtem karatézni, hogy elmentem egyetemre.
+
+</p>
+<h1>Múlt befejezett folyamatos</h1>
+<p class="mondatok"  >
+
+When I arrived home they had been playing. Mikor hazaértem, ők már játszottak.
+
+By the time she woke up, the boy had been walking the dog.	Mire felkelt, a fiú már a kutyát sétáltatta.
+
+At 10 they had been playing tennis for five hours. Tízkor már öt órája teniszeztek.
+
+He was tired, because he had been working since dawn. Fáradt volt, mert hajnal óta dolgozott.
+
+When I called him, he said he had been cleaning up for hours. Mikor felhívtam, azt mondta, hogy már órák óta takarít.
+
+By the time I arrived, the painters had been painting the doors. Mire odaértem, a festők már az ajtókat festették.
+
+When we finished the game, John had been sleeping. Mikor befejeztük a játékot, John már aludt.
+
+We had been travelling for two hours when	I realised that I didn't have my passport on me. Két órája utaztunk, mikor észrevettem, hogy nincs nálam az útlevelem.
+
+We had been hoeing by then.	Akkor már kapáltunk.
+
+What had you been doing for hours then?	Mit csináltál akkor már órák óta?
+
+I hadn't been sleeping for three days by this time yesterday. Tegnap ilyenkor volt három napja, hogy nem aludtam.
+
+Had she been cooking by then?	Akkor már főzött?
+
+</p>
+<h1>Going to</h1>
+<p class="mondatok"  >
+
+We are going to travel to Japan next month.	Jövő hónapban Japánba fogunk utazni.
+
+They are going to buy that house. Meg fogják venni azt a házat.
+
+She is going to marry a French businessman. Hozzá fog menni egy francia üzletemberhez.
+
+I am going to learn marketing from next week. Jövő héttől marketinget fogok tanulni.
+
+Mrs Collins is going to be the new boss. Mrs Collins lesz az új főnök.
+
+Jenny is going to sell her antique table. Jenny el fogja adni az antik asztalát.
+
+She is going to arrive at 10:15. 10:15-kor fog megérkezni.
+
+Alan is going to get a nem car.	Alan új autót fog kapni.
+
+We are not going to take part in the meeting today. Nem fogunk részt venni a mai megbeszélésen.
+
+Are you going to invite him too?	Őt is meg fogod hívni?
+
+</p>
+<h1>Igeidők</h1>
+<p class="mondatok"  >
+
+When his wife arrived, Bill was having dinner. Amikor a felesége megérkezett, Bill éppen vacsorázott.
+
+By the time his wife arrived, Bill had had dinner. Mire a felesége megérkezett, Bill megvacsorázott.
+
+When his wife arrived, Bill had been having dinner. Mikor a felesége megérkezett, Bill már vacsorázott.
+
+At midnight they were drinking the fourth bottle of wine.	Éjfélkor éppen a negyedik üveg bort itták.
+
+By midnight they had drunk the fourth bottle of wine. Éjfélre megitták a negyedik üveg bort.
+
+At midnight they had been drinking the fourth bottle of wine. Éjfélkor már a negyedik üveg bort itták.
+
+At 10 o'clock I will be reading a book.	10-kor éppen olvasni fogok egy könyvet.
+
+By 10 o'clock I will have read a book.	10-re elolvasok egy könyvet.
+
+At 10 I'll have been reading a book. 10-kor már olvasni fogok egy könyvet.
+
+When he returns from England, we will be painting the house. Mikor visszajön Angliából, éppen festeni fogjuk a házat.
+
+By the time he returns from England, we will have painted the house. Mire visszajön Angliából, ki fogjuk festeni a házat.
+
+When he returns from England, we will have been painting the house. Mikor visszajön Angliából, már festeni fogjuk a házat.
+
+When you wake up, I will be cooking.	Mikor felkelsz, én (éppen) főzni fogok.
+
+By the time you wake up, I'll have cooked.	Mire felkelsz, megfőzök.
+
+When you wake up, I'll have been cooking.	Mikor felkelsz, már főzni fogok.
+
+</p>
+<h1>Függőbeszéd</h1>
+<p class="mondatok"  >
+
+Tim says he likes football very much.	Tim azt mondja, nagyon szereti a focit.
+
+They say they have been waiting for him for hours. Azt mondják, hogy már órák óta várnak rá.
+
+She says that she won't have finished work by 5. Azt mondja, hogy nem fogja 5-re befejezni a munkát.
+
+Melanie says when she woke up everybody else was still sleeping. Melanie azt mondja, mikor felkelt, mindenki más még aludt.
+ 
+I am working on the article. A cikken dolgozom.
+
+He said he was working on the article.	Azt mondta, a cikken dolgozik.
+
+She said that they hadn't gone abroad	this year. Azt mondta, hogy idén nem mentek külföldre.
+
+He said he would do the shopping that day.	Azt mondta, aznap ő vásárol.
+
+She said she hadn't gone to Germany the previous summer. Azt mondta, előző nyáron nem ment Németországba.
+
+Tim said he liked football very much.	Tim azt mondta, nagyon szereti a focit.
+
+They said they had been waiting for him for hours. Azt mondták, hogy már órák óta várnak rá.
+
+She said that she wouldn't have finished work by 5. Azt mondta, hogy nem fogja 5-re befejezni a munkát.
+
+Melanie said when she had woken up everybody else had still been sleeping. Melanie azt mondta, mikor felkelt, mindenki más még aludt.
+
+He said if he had time, he would call me.	Azt mondta, ha lesz ideje, fel fog hívni.
+
+He said if he had time, he would call me.	Azt mondta, ha lenne ideje, felhívna.
+
+He said if he had had time, he'd have called me. Azt mondta, ha lett volna ideje, felhívott volna.
+ 
+She said her name is/was Mary Collins.
+
+He said that the wind there always blows/blew from the North.
+
+She said she will go to the next Olimpic Games in 2016.
+
+She asks if you saw the film yesterday.	Azt kérdezi, hogy láttad-e a filmet tegnap.
+
+He asks if I am married.	Azt kérdezi, hogy házas vagyok-e.
+
+He asks if they will come this weekend.	Azt kérdezi, hogy jönnek-e ezen a hétvégén.
+
+She asks whether you will come with us or stay at home. Azt kérdezi eljössz-e velünk, vagy itthon maradsz.
+
+Jack asks whether you want to play football or basketball. Jack azt kérdezi, hogy focizni akarsz, vagy kosárlabdázni.
+
+He asks if she is sleeping.	Azt kérdezi, hogy alszik-e.
+
+She asks if he has been working for long.	Azt kérdezi, régóta dolgozik-e.
+
+He asks whether you can swim or not.	Azt kérdezi, hogy tudsz-e úszni, vagy nem.
+
+She asks if they hurt me.	Azt kérdezi bántottak-e (engem).
+
+She asked if you had seen the film the day before. Azt kérdezte, hogy láttad-e a filmet előző nap.
+
+He asked if I was married.	Azt kérdezte, hogy házas vagyok-e.
+
+He asked if they would come that weekend.Azt kérdezte, hogy jönnek-e azon a hétvégén.
+
+He asked if she was sleeping.	Azt kérdezte, hogy alszik-e.
+
+She asked if he had been working for long.	Azt kérdezte, régóta dolgozik-e.
+
+He asked whether you could swim or not.	Azt kérdezte, hogy tudsz-e úszni, vagy nem?
+
+She asked if they had hurt me.	Azt kérdezte bántottak-e (engem).
+
+She asks where I bought these shoes.	Azt kérdezi, hol vettem ezt a cipőt.
+
+He asks what you will tell them.	Azt kérdezi, hogy mit fogsz nekik mondani.
+
+She asks how old his dog is.	Azt kérdezi, hogy mennyi idős a kutyája.
+
+He asks how often you use the computer.	Azt kérdezi, hogy milyen gyakran használod a számítógépet.
+
+I am asking when she got the job.	Azt kérdezem, mikor kapta meg a munkát.
+
+He asks where you are travelling during the holiday. Azt kérdezi, hová utazol a szünetben.
+
+She asks who is your best friend.	Azt kérdezi, ki a legjobb barátod.
+
+She asked where I had bought those shoes.	Azt kérdezte, hol vettem azt a cipőt.
+
+He asked what you would tell them.	Azt kérdezte, hogy mit fogsz nekik mondani.
+
+She asked how old his dog was.	Azt kérdezte, hogy mennyi idős a kutyája.
+
+He asked how often you used the computer.	Azt kérdezte, hogy milyen gyakran használod a számítógépet.
+
+I asked when she had got the job.	Azt kérdeztem, mikor kapta meg a munkát.
+
+Ha asked where you were travelling during the holiday. Azt kérdezte, hová utazol a szünetben.
+
+She asked who was your best friend.	Azt kérdezte, ki a legjobb barátod.
+
+She told me to get up.	Azt mondta, hogy keljek fel.
+
+She asks us to try to be on time.	Arra kér minket, hogy próbáljunk pontosak lenni.
+
+He ordered me not to hurry.	Utasított, hogy ne siessek.
+
+She told him never to speak to her like that again. Azt mondta neki, soha ne beszéljen vele így.
+
+She asks me to be more polite.	Arra kér, hogy legyek udvariasabb.
+
+She begged me to wait for her.	Könyörgött, hogy várjam meg.
+
+He asked Tom to hold the box.	Megkérte Tomot, hogy fogja meg a dobozt.
+
+</p>
+<h1>Célhatározói mellékmondatok TO / IN ORDER TO / SO AS TO</h1>
+<p class="mondatok"  >
+
+Mary travelled to Paris to see the Eiffel Tower. Mary elutazott Párizsba, hogy (ő, Mary) lássa az Eiffel Tornyot.
+
+We took a taxi to catch the plane.Taxiba szálltunk, hogy elérjük a gépet.
+
+Jason goes swimming every day to keep fit.Jason mindennap úszni jár, hogy jó kondícióban legyen.
+
+I am not here to solve your problems.Nem azért vagyok itt, hogy megoldjam a problémáidat.
+
+We joined the bowling club in order to take part in the championship.Azért csatlakoztunk a bowling klubhoz, hoy részt vegyünk a bajnokságban.
+
+Bill bought a new TV set so as to watch films in the bedroom too.Bill vett egy új TV-t, hogy a hálóban is filmezzen.
+
+I had a coffee so as not to be so sleepy.Ittam egy kávét, hogy ne legyek olyan álmos.
+
+I went to the party to meet Tom.Elmentem a buliba, hogy találkozzak Tommal.
+
+I didn't go to the party to meet Tom.Nem mentem el a buliba, hogy találkozzak Tommal.
+
+I went to the party not to meet Tom.Elmentem a buliba, hogy ne találkozzak Tommal.
+
+I didn't go to the party not to meet Tom.Nem mentem el a buliba, hogy ne találkozzak Tommal.
+
+I rented a car so that we could travel around Scotland.Autót béreltem, hogy körbeautózzuk Skóciát.
+
+We are redecorating one of our rooms so that Jenny can move in.Felújítjuk az egyik szobánkat, hogy Jane beköltözhessen.
+ 
+I have prepared some sandwiches so that the guests won't be hungry in the evening.Készítettem néhány szendvicset, hogy a vendégek ne legyenek éhesek este (majd).
+
+I prepared some sandwiches so that the guests wouldn't be hungry in the evening.Készítettem néhány szendvicset, hogy a vendégek ne legyenek éhesek este (pl. tegnap).
+
+She cleaned the house so that her mother wouldn't have to.Kitakarította a házat, hogy az édesanyjának ne kelljen.
+
+Philip has brought some newspapers so that we can look at the small ads.Philip hozott néhány újságot, hogy megnézhessük az apróhirdetéseket.
+
+I didn't watch the film so I could enjoy the book more.Nem néztem meg a filmet, hogy jobban élvezhessem a könyvet. (Megegyezik az alany, és kihagyható a that a szerkezetből.)
+
+The man who is standing at the door is my uncle.	Az a férfi, aki az ajtónál áll, a magybátyám.
+ 
+</p>
+<h1>Vonatkozói mellékmondatok megszorító</h1>
+<p class="mondatok"  >
+
+The man who is standing at the door is my uncle. Az a férfi, aki az ajtónál áll, a nagybátyám.
+
+The woman that lives next door is a doctor. Az a nő, aki a szomszédban lakik, orvos.
+
+The workers who went on strike were fired. Azokat a munkásokat, akik sztrájkba léptek, kirúgták.
+
+The girl that found the lost dog got a reward. Az a lány, aki megtalálta az elveszett kutyát, jutalmat kapott.
+
+The students who went to the competition	will get a prize. Azok a tanulók, akik elmentek a versenyre, díjat fognak kapni.
+
+The book which is on the table is Mary's.	Az a könyv, ami az asztalon van, Mary-é.
+
+I can't go into the garage because of the car that is parking in front of our house. Nem tudok beállni a garázsba amiatt az autó miatt, ami a ház előtt parkol.
+
+The films that are on at the movies are all boring. A filmek, amik most mennek a mozikban, mind unalmasak.
+
+The house which is next to the station used to be a library. Az a ház, ami az állomás mellett van, régen könyvtár volt.
+
+The computer that has gone wrong is	now in the loft. Az a számítógép, ami elromlott, most a padláson van.
+
+The boy who we saw yesterday is French.	Az a fiú, akit tegnap láttunk, francia.
+
+The policeman that has been hit by a car is now being examined. Most vizsgálják azt a rendőrt, akit elütött egy autó.
+
+The robber whom the judge found guilty will be sent to prison. Azt a rablót, akit a bíró bűnösnek talált, börtönbe fogják küldeni.
+
+The workers he employs are always drinking. A munkások, akiket alkalmaz, mindig isznak.
+
+The men who you met are my collegues.	A férfiak, akikkel találkoztál, a kollégáim.
+
+The book I bought last week is very exciting. Az a könyv, amit múlt héten vettem, nagyon izgalmas.
+
+I have found the papers that I lost weeks ago. Megtaláltam azokat a papírokat, amiket hetekkel ezelőtt hagytam el.
+
+The film which we saw was boring.	A film, amit láttunk, unalmas volt.
+
+In their flat you can feel the vibration which the trucks cause. A lakásukban lehet érezni a rezgést, amit a kamionok okoznak.
+
+The fruit trees that we planted last year are now blossoming. Virágoznak azok a gyümölcsfák, amiket tavaly ültettünk.
+ 
+The boy whose dog is with us now is in Japan for a month. A fiú, akinek a kutyája nálunk van, Japánban van egy hónapig.
+
+The old lady whose house had burnt	down won the lottery five. Az az idős hölgy nyerte meg a lottó ötöst, akinek a háza leégett.
+
+The man whose car was stolen will buy a motorbike. Az a férfi, akinek ellopták az autóját, motort fog venni.
+
+The play is about a girl whose boyfriend dies in the war. A darab egy olyan lányról szól, akinek meghal a barátja a háborúban.
+
+He is the guy whose wife is the director of the company. Ő az a fickó, akinek a felesége a cég igazgatója.
+
+The coat of which collar is black is mine.	Az a kabát, aminek a gallérja fekete, az enyém.
+
+The house of which walls are of glass was built in 2000. Az a ház, aminek a falai üvegből vannak, 2000-ben épült.
+
+The cat whose leg was operated on last	week can already run.	Az a macska, amelyiknek a lábát múlt héten operálták, már tud futni.
+
+The telephone of which buttons are missing can still work.	A telefon, aminek hiányoznak a gombjai, működik. 
+
+The book of which author died in 1990 has been nominated to a prize.	Díjra jelölték azt a könyvet, aminek a szerzője 1990-ben meghalt.
+
+</p>
+<h1>Vonatkozói mellékmondatok nem megszorító</h1>
+<p class="mondatok"  >
+
+My father, who is an engineer, got a new job at the company. Az apám, aki mérnök, új munkát kapott a cégnél.
+
+John, who is a talented pianist, can play the flute as well. John, aki tehetséges zongorista, fuvolázni is tud.
+
+My neighbour, who is a young man, broke	both his legs in a ski accident. A szomszédom, aki egy fiatalember, mindkét lábát eltörte egy síbalasetben.
+
+The director, who was elected just last year, has resigned.	Az igazgató, aki csak tavaly lett megválasztva, lemondott.
+
+Susan, who is English, can hardly get used to the traffic in Europe. Susan, aki angol, nehezen tudja megszokni a közlekedést Európában.
+
+My last telephone, which was as heavy as a stone, worked perfectly. Az előző telefonom, ami olyan nehéz volt, mint egy kő, tökéletesen működött.
+
+His new plan, which is very clever in my opinion, hasn't been accepted. Az új tervét, ami szerintem nagyon okos, nem fogadták el.
+
+Our car, which is an old Ford, is worth	about 2000 euros. Az autónk, ami egy régi Ford, kb 2000 eurót ér.
+
+The only church of the town, which was	built in the 18th century, is under construction. A város egyetlen temploma, ami a 18ik században épült, átépítés alatt áll.
+
+This clock, which happens to be Swiss, was bought by my granfather.	Ezt az órát, ami történetesen svájci, a nagyapám vette.
+
+Billy, who we saw at the concert, has gone to France. Billy, akit a koncerten láttunk, elment Franciaországba.
+
+Martin Bakers, who the people had	elected to be a representative a month ago, caused a lethal accident. Martin Bakers, akit az emberek múlt hónapban választottak képviselővé, halálos balesetet okozott.
+
+Her only sister, who I met in Bristol, is visiting her today. Az egyetlen testvére, akivel Bristolban találkoztam, ma fogja meglátogatni.
+
+Joan, who we cannot call a big football fan, went to the match with the children. Joan, akit nem nevezhetünk nagy focirajongónak, kiment a meccsre a gyerekekkel.
+
+My aunt, who I love very much, wants to buy me a car. A nagynéném, akit nagyon szeretek, venni akar nekem egy autót.
+
+These shoes, which I bought for my son, only fit my daughter. Ez a cipő, amit a fiamnak vettem, csak a lányomra jó.
+
+His house, which he built in1990, is still beautiful. A háza, amit 1990-ben épített, még mindig gyönyörű.
+
+Our new office, which you can find in	the centre, is not big enough for us. Az új irodánk, amit a központban találsz, nem elég nagy nekünk.
+
+George's watch, which he bought for a	fortune, is always late. George órája, amit egy vagyonért vett, mindig késik.
+
+His paintings, which anyone can see	in the town galery, are all about his secret love. A képei, amiket bárki megnézhet a városi képtárban, mind a titkos szerelméről szólnak.
+
+Mary, whose husband is a soldier, wants to have a baby. Mary, akinek a férje katona, gyereket akar.
+
+John, whose car had been stolen, bought a new Volvo.	John, akinek ellopták az autóját, vett egy Volvót.
+
+My granny, whose doctor is a famous professor, is getting better very quickly.A nagymamám, akinek az orvosa egy híres professzor, gyorsan javul.
+
+Jack, whose test was the best, is a historian. Jack, akinek a tesztje a legjobb lett, történész.
+
+Phil, whose imagination is endless, thinks we are Russian spies. Phil, akinek a fantáziája végtelen, azt hiszi, hogy orosz kémek vagyunk.
+
+My bicycle, of which tyre is always flat, is a piece of rubbish. A biciklim, aminek a kereke mindig lapos, egy rakás szemét.
+
+His latest novel, of which title is The Mutiny, is a big success. A legújabb regénye, aminek a címe "A lázadás", nagy siker.
+
+Australia, of which capital is Canberra, is a big island. Ausztrália, aminek a fővárosa Canberra, egy nagy sziget.
+
+His knife, of which blade is Japanese, can cut even iron. A kése, aminek a pengéje japán, a vasat is el tudja vágni.
+
+Susan's dog, whose name is Jerry, is a labrador. Susan kutyája, aminek a neve Jerry, labrador.
+
+</p>
+
+</pre>
+</div>
+</body>
+</html> 
